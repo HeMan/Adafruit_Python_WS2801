@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import time
+import colorsys
 
 import Adafruit_GPIO.SPI as SPI
 
@@ -97,6 +98,19 @@ class WS2801Pixels(object):
         self._pixels[n*3+1] = g & 0xFF
         self._pixels[n*3+2] = b & 0xFF
 
+    def set_pixel_hsv(self, n, h, s, v):
+        """Set the specified pixel n to the provided float hue, sataturation
+        and value.  Note you MUST call show() after setting pixels to
+        see the LEDs change color!
+        """
+        assert n >= 0 and n < self._count, 'Pixel n outside the count of pixels!'
+        assert s >= 0.0 and s <= 1.0, 'Saturation out of normalized value 0.0-1.0'
+        assert v >= 0.0 and v <= 1.0, 'Value out of normalized value 0.0-1.0'
+        (r, g, b) = colorsys.hsv_to_rgb(h, s, v)
+        self._pixels[n*3]   = int(r * 255)
+        self._pixels[n*3+1] = int(g * 255)
+        self._pixels[n*3+2] = int(b * 255)
+
     def get_pixel(self, n):
         """Retrieve the 24-bit RGB color of the specified pixel n."""
         r, g, b = self.get_pixel_rgb(n)
@@ -122,6 +136,14 @@ class WS2801Pixels(object):
         """
         for i in range(self._count):
             self.set_pixel_rgb(i, r, g, b)
+
+    def set_pixels_hsv(self, h, s, v):
+        """Set all pixels to the provided float hue, sataturation
+        and value. Note you MUST call show() after setting pixels to see the LEDs
+        change!
+        """
+        for i in range(self._count):
+            self.set_pixel_hsv(i, h, s, v)
 
     def clear(self):
         """Clear all the pixels to black/off.  Note you MUST call show() after
